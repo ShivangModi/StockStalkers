@@ -11,12 +11,10 @@ def generate_stock_detail(info: dict):
                     [
                         dbc.Col(
                             html.Img(src=info["logo"]),
-                            # width="auto",
                             align="center"
                         ),
                         dbc.Col(
                             html.H4(info["name"]),
-                            # width="auto",
                             align="center"
                         )
                     ],
@@ -65,35 +63,12 @@ def generate_stock_detail(info: dict):
     return stock_details
 
 
-def generate_stock_graph(graph):
+def generate_stock_graph(fig):
     stock_graph = dbc.Col(
-        [
-            dbc.Row(
-                [
-                    dbc.Label("Prediction Model"),
-                    dbc.Checklist(
-                        options=[
-                            {"label": "MA", "value": "MA"},
-                            {"label": "LR", "value": "LR"},
-                            {"label": "KNN", "value": "KNN"},
-                            {"label": "ARIMA", "value": "ARIMA"},
-                            {"label": "LSTM", "value": "LSTM"},
-                        ],
-                        value=[],
-                        inline=True,
-                        switch=True,
-                        id="switches-inline-input",
-                    )
-                ],
-                style={
-                    "margin-bottom": "15px"
-                }
-            ),
-            dbc.Row(
-                dcc.Graph(figure=graph),
-                align="center",
-            )
-        ],
+        dbc.Row(
+            dcc.Graph(figure=fig),
+            align="center",
+        ),
         style={
             "padding": "15px"
         }

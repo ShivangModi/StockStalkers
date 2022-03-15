@@ -1,6 +1,6 @@
 import yfinance as yf
 import plotly.express as px
-import plotly.graph_objs as go
+from models import *
 
 
 class Stock:
@@ -10,6 +10,12 @@ class Stock:
 
         self.df = None
         self.ticker = ticker
+        self.__ma = None
+        self.__slr = None
+        self.__knn = None
+        self.__arima = None
+        self._lstm = None
+
         # self.start_date = start_date
         # self.end_date = end_date
 
@@ -45,25 +51,46 @@ class Stock:
             print(e)
             return
 
-    def __close_graph(self):
-        fig = px.line(
-            self.df,
-            x="Date",
-            y="Close",
-            title="Close Price",
-            height=450,
-            width=600
-        )
-        # fig = go.Scatter(
-        #     x=self.df["Date"],
-        #     y=self.df["Close"],
-        #     name="Close"
-        # )
-        return fig
+    # def __actual_graph(self):
+    #     fig = px.line(
+    #         self.df,
+    #         x="Date",
+    #         y="Close",
+    #         title="Close Price",
+    #         height=450,
+    #         width=600
+    #     )
+    #     return fig
+
+    def __prediction(self):
+        split = int(len(self.df) * 0.8)
+        train = self.df[:split]
+
+        x_train = np.array(train['Open'])
+        y_train = np.array(train['Close'])
+
+        slr = LinearRegression()
+        slr.fit(x_train, y_train)
+        slr_pred = slr.predict(self.df['Open'])
+
+        return {'Actual Close Price': self.df['Open'], 'LR Prediction': slr_pred}
 
     def get_graph(self):
         if self.__get_data():
-            close_graph = self.__close_graph()
-            return close_graph
+            # actual_graph = self.__actual_graph()
+            close = self.__prediction()
+
+            data = []
+            for i in close:
+                temp = dict(x=self.df["Date"], y=close.get(i), type='scatter', name=i)
+                data.append(temp)
+
+            fig = {
+                'data': data,
+                'layout': {
+                    'title': 'Stock prediction'
+                }
+            }
+            return fig
         else:
             raise ConnectionError

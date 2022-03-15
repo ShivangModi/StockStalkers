@@ -24,7 +24,6 @@ stock_form = dbc.Row(
                 placeholder="TICKER",
                 debounce=True,
                 size="lg",
-                # type="search"
             ),
             width="auto",
             align="center"

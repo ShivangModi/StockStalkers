@@ -2,7 +2,6 @@ import dash
 from dash import Input, Output, State
 
 from stock import *
-from models import *
 from functions import *
 from components import *
 
@@ -27,18 +26,7 @@ from components import *
 # linear_regression = LinearRegression()
 # linear_regression.fit(x_train, y_train)
 # y_pred = linear_regression.predict(data["Open"])  # Test Prediction
-# actual = go.Scatter(
-#     x=data['Date'],
-#     y=data['Close'],
-#     name="Actual Close Value"
-# )
-# lr_prediction = go.Scatter(
-#     x=data['Date'],
-#     y=y_pred,
-#     name="Linear Regression Prediction"
-# )
-#
-# dt = [actual, lr_prediction]
+
 # dt = []
 # layout = dict(title="Stock Prediction", showlegend=False, height=500, width=700)
 # fig = dict(data=dt, layout=layout)
@@ -63,11 +51,20 @@ app = dash.Dash(
 app.layout = html.Div(
     [
         navbar,
-        # html.Div(
-        #     dcc.Graph(
-        #         id="Stock Prediction",
-        #         figure=fig
-        #     )
+        # dcc.Graph(
+        #     figure={
+        #         'data': [
+        #             {'x': data["Date"], 'y': data["Close"], 'type': 'scatter', 'name': 'Actual'},
+        #             {'x': data["Date"], 'y': y_pred, 'type': 'scatter', 'name': 'Linear Regression'},
+        #         ],
+        #         'layout': {
+        #             'title': 'Dash Data Visualization'
+        #         }
+        #     },
+        #     style={
+        #         "height": 450,
+        #         "width": 600,
+        #     }
         # ),
         html.Div(
             id="main-view",
@@ -101,13 +98,7 @@ def toggle_navbar_collapse(n, is_open):
     [
         Input(component_id="ticker", component_property="value"),
         # Input(component_id="forecast-btn", component_property="n_clicks"),
-    ],
-    # [
-    #     State(component_id="ticker", component_property="value"),
-    #     State(component_id="forecast-day", component_property="value"),
-    #     State(component_id="stock-date-picker-range", component_property="start_date"),
-    #     State(component_id="stock-date-picker-range", component_property="end_date"),
-    # ]
+    ]
 )
 def update_ticker(ticker):
     # fetching context to determine which button triggered callback
