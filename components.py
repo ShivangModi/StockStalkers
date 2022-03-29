@@ -1,7 +1,6 @@
 import dash_bootstrap_components as dbc
 
 from dash import html, dcc
-from datetime import date, timedelta
 
 symbol = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 

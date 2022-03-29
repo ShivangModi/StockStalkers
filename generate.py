@@ -26,7 +26,10 @@ def generate_stock_detail(info: dict):
                 dbc.Row(
                     dbc.Col(
                         html.P(
-                            html.H6(info["description"])
+                            html.H6(info["description"]),
+                            style={
+                                'text-align': 'justify',
+                            }
                         )
                     )
                 ),

@@ -1,45 +1,10 @@
 import dash
 from dash import Input, Output, State
 
-from stock import *
-from functions import *
 from components import *
 
-# # Importing dataset
-# data = yf.download('TTM').reset_index()
-# # data = yf.download('GOOGL').reset_index()
-# # data = yf.download('SPY').reset_index()
-# data.index = data['Date']
-# # print(data)
-#
-# # Splitting dataset into train and test set
-# split = int(len(data) * 0.7)
-# train = data[:split]
-# test = data[split:]
-#
-# x_train = np.array(train['Open'])
-# y_train = np.array(train['Close'])
-# x_test = np.array(test['Open'])
-# y_test = np.array(test['Close'])
-#
-# # Linear Regression
-# linear_regression = LinearRegression()
-# linear_regression.fit(x_train, y_train)
-# y_pred = linear_regression.predict(data["Open"])  # Test Prediction
-
-# dt = []
-# layout = dict(title="Stock Prediction", showlegend=False, height=500, width=700)
-# fig = dict(data=dt, layout=layout)
-
-desc = """
-Stock Stalkers is a stock market prediction website.
-The stock market process is full of uncertainty, expectations and is affected by 
-many factors. Hence Stock market prediction is one of the important factors in 
-finance and business.
-In this we will predict price using different machine learning model like 
-Moving Average(MA), Simple Linear Regression(LR), K-Nearest Neighbors(KNN), 
-Auto-Regressive Integrated Moving Average(ARIMA) and Long Short-Term Memory(LSTM).
-"""
+from stock import Stock
+from generate import generate_stock_detail, generate_stock_graph
 
 # Initialising dash app
 app = dash.Dash(
@@ -51,21 +16,6 @@ app = dash.Dash(
 app.layout = html.Div(
     [
         navbar,
-        # dcc.Graph(
-        #     figure={
-        #         'data': [
-        #             {'x': data["Date"], 'y': data["Close"], 'type': 'scatter', 'name': 'Actual'},
-        #             {'x': data["Date"], 'y': y_pred, 'type': 'scatter', 'name': 'Linear Regression'},
-        #         ],
-        #         'layout': {
-        #             'title': 'Dash Data Visualization'
-        #         }
-        #     },
-        #     style={
-        #         "height": 450,
-        #         "width": 600,
-        #     }
-        # ),
         html.Div(
             id="main-view",
             style={
@@ -114,8 +64,13 @@ def update_ticker(ticker):
             close_graph = stock.get_graph()
             stock_graph = generate_stock_graph(close_graph)
 
-            return dbc.Row([stock_detail, stock_graph], align="center")
-            # return stock_detail
+            # return dbc.Row([stock_detail, stock_graph], align="center")
+            return dbc.Container(
+                [
+                    dbc.Row(stock_detail, align="center"),
+                    dbc.Row(stock_graph, align="center"),
+                ]
+            )
         else:
             alert = dbc.Alert(
                 "No TICKER found!!!",
@@ -127,10 +82,4 @@ def update_ticker(ticker):
 
 
 if __name__ == '__main__':
-    # # plot
-    # plt.plot(train['Date'], train['Close'])
-    # plt.plot(test['Date'], test['Close'])
-    # plt.plot(test['Date'], y_pred)
-    # plt.show()
-
     app.run_server(debug=True)
