@@ -113,7 +113,7 @@ def KNN(df):
     return knn_pred
 
 
-# ARIMA
+# Auto Regressive Integrated Moving Average (ARIMA)
 def AR(p, df):
     # Generating the lagged p terms
     for i in range(1, p + 1):

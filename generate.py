@@ -68,12 +68,16 @@ def generate_stock_detail(info: dict):
 
 def generate_stock_graph(fig):
     stock_graph = dbc.Col(
-        dbc.Row(
-            dcc.Graph(figure=fig),
-            align="center",
+        dbc.Container(
+            [
+                dbc.Row(
+                    dcc.Graph(figure=fig),
+                    align="center",
+                ),
+            ]
         ),
         style={
-            "padding": "15px"
+            "margin-top": "15px"
         }
     )
     return stock_graph
