@@ -6,14 +6,16 @@ pd.options.mode.chained_assignment = None
 from sklearn import neighbors
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler
-
 from sklearn.metrics import mean_squared_error
+
+from keras.models import Sequential
+from keras.layers import Dense, LSTM
 
 
 # Simple Moving Average
 def MovingAverage(df):
     ma_pred = []
-    window_size = 100
+    window_size = 200
 
     i = len(df) - window_size
     while i > 0:
@@ -22,7 +24,9 @@ def MovingAverage(df):
         ma_pred.append(window_average)
         i = i - 1
     ma_pred.reverse()
-    return ma_pred
+
+    pred = pd.DataFrame({'Date': df['Date'][200:], 'Value': df['Close'][200:], 'Predicted_Values': ma_pred})
+    return pred
 
 
 # Simple Linear Regression with Gradient Descent Algorithm
@@ -82,7 +86,9 @@ class LinearRegression:
     def predict(self, x):
         if self.__normalize:
             x = self.__normalizeX(x)
-        return np.dot(x, self.m) + self.c
+        slr_pred = np.dot(x, self.m) + self.c
+        pred = pd.DataFrame({'Date': self.__df['Date'], 'Value': self.__df['Close'], 'Predicted_Values': slr_pred})
+        return pred
 
 
 # K-Nearest Neighbor algorithm with library
@@ -100,9 +106,12 @@ def KNN(df):
     x_train = pd.DataFrame(x_train_scaled)
 
     # GrindSearch to find the best parameter
-    params = {'n_neighbors': [i for i in range(2, 10)]}
+    params = {
+        'n_neighbors': range(1, 100),
+        'weights': ["uniform", "distance"]
+    }
     knn = neighbors.KNeighborsRegressor()
-    model = GridSearchCV(knn, params, cv=5)
+    model = GridSearchCV(knn, params)
 
     # fit model and make prediction
     model.fit(x_train, y_train)
@@ -110,7 +119,8 @@ def KNN(df):
     x_scaled = scaler.fit_transform(x_test)
     x = pd.DataFrame(x_scaled)
     knn_pred = model.predict(x)
-    return knn_pred
+    pred = pd.DataFrame({'Date': df['Date'], 'Value': df['Close'], 'Predicted_Values': knn_pred})
+    return pred
 
 
 # Auto Regressive Integrated Moving Average (ARIMA)
@@ -217,3 +227,78 @@ def ARIMA(data):
     df_c = df_c.dropna().reset_index()
     df_c.index = df_c['Date']
     return df_c[['Date', 'Value', 'Predicted_Values']]
+
+
+# Long Short-Term Memory (LSTM)
+def create_dataset(data, time_step=1):
+    dataX, dataY = [], []
+    for i in range(len(data) - time_step - 1):
+        a = data[i: (i + time_step), 0]  # i=0
+        dataX.append(a)  # 0,1,2,3,4---99
+        dataY.append(data[i + time_step, 0])  # 100
+    return np.array(dataX), np.array(dataY)
+
+
+def LSTM_model(data):
+    df = data['Close']
+
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    df1 = scaler.fit_transform(np.array(df).reshape(-1, 1))
+
+    split = int(len(df1) * 0.75)
+    train_data = df1[:split, :]
+    test_data = df1[split:, :1]
+
+    # reshape into X=t,t+1,t+2,t+3 and Y=t+4
+    time_step = 100
+    X_train, y_train = create_dataset(train_data, time_step)
+    # X_test, y_test = create_dataset(test_data, time_step)
+    X_test, y_test = create_dataset(df1, time_step)
+
+    X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+    X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
+
+    model = Sequential()
+    model.add(LSTM(50, return_sequences=True, input_shape=(100, 1)))
+    model.add(LSTM(50, return_sequences=True))
+    model.add(LSTM(50))
+    model.add(Dense(1))
+    model.compile(loss='mean_squared_error', optimizer='adam')
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=2, batch_size=64, verbose=1)
+
+    lstm_pred = model.predict(X_test)
+    lstm_pred = scaler.inverse_transform(lstm_pred)
+    lstm_pred = np.array(lstm_pred).ravel()
+    pred = pd.DataFrame({'Date': data['Date'][101:], 'Value': data['Close'][101:], 'Predicted_Values': lstm_pred})
+
+    x_input = df1[len(df1) - 100:].reshape(1, -1)
+    temp_input = list(x_input)
+    temp_input = temp_input[0].tolist()
+
+    # prediction for next 180 days
+    future_value = []
+    n_steps = 100
+    i = 0
+    while i < 180:
+        if len(temp_input) > 100:
+            x_input = np.array(temp_input[1:])
+            x_input = x_input.reshape(1, -1)
+            x_input = x_input.reshape((1, n_steps, 1))
+            yhat = model.predict(x_input, verbose=0)
+            temp_input.extend(yhat[0].tolist())
+            temp_input = temp_input[1:]
+            future_value.extend(yhat.tolist())
+        else:
+            x_input = x_input.reshape((1, n_steps, 1))
+            yhat = model.predict(x_input, verbose=0)
+            temp_input.extend(yhat[0].tolist())
+            future_value.extend(yhat.tolist())
+        i = i + 1
+
+    from datetime import datetime
+    future_date = pd.date_range(datetime.today(), periods=180).tolist()
+    future_value = scaler.inverse_transform(future_value)
+    future_value = np.array(future_value).ravel()
+    future_pred = pd.DataFrame({'Date': future_date, 'Value': future_value})
+
+    return [pred, future_pred]

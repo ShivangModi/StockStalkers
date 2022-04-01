@@ -4,7 +4,7 @@ from dash import Input, Output, State
 from components import *
 
 from stock import Stock
-from generate import generate_stock_detail, generate_stock_graph
+from generate import generate_stock_detail, generate_stock_graph, generate_score_table
 
 # Initialising dash app
 app = dash.Dash(
@@ -46,29 +46,35 @@ def toggle_navbar_collapse(n, is_open):
 @app.callback(
     Output(component_id="main-view", component_property="children"),
     [
-        Input(component_id="ticker", component_property="value"),
-        # Input(component_id="forecast-btn", component_property="n_clicks"),
+        Input(component_id="forecast-btn", component_property="n_clicks"),
+    ],
+    [
+        State(component_id="ticker", component_property="value"),
     ]
 )
-def update_ticker(ticker):
+def update_ticker(submit, ticker):
     # fetching context to determine which button triggered callback
     ctx = dash.callback_context
     trigger = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    if trigger == "ticker":
+    if submit and trigger == "forecast-btn":
         if ticker:
             stock = Stock(ticker)
             stock_info = stock.get_info()
-            stock_detail = generate_stock_detail(stock_info)
+
+            stock_detail = generate_stock_detail(stock_info)    # Generate Stock Details
 
             close_graph = stock.get_graph()
-            stock_graph = generate_stock_graph(close_graph)
+            stock_graph = generate_stock_graph(close_graph)     # Generate Prediction Graph
+
+            table = generate_score_table(stock.r2)              # Generate Table
 
             # return dbc.Row([stock_detail, stock_graph], align="center")
             return dbc.Container(
                 [
                     dbc.Row(stock_detail, align="center"),
                     dbc.Row(stock_graph, align="center"),
+                    dbc.Row(table, align="center"),
                 ]
             )
         else:

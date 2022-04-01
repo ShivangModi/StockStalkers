@@ -73,7 +73,7 @@ def generate_stock_graph(fig):
                 dbc.Row(
                     dcc.Graph(figure=fig),
                     align="center",
-                ),
+                )
             ]
         ),
         style={
@@ -81,3 +81,46 @@ def generate_stock_graph(fig):
         }
     )
     return stock_graph
+
+
+def generate_score_table(r2):
+    table_header = [
+        html.Thead(
+            html.Tr(
+                [
+                    html.Th(""),
+                    html.Th("SLR"),
+                    html.Th("KNN"),
+                    html.Th("MA"),
+                    html.Th("ARIMA"),
+                    html.Th("LSTM"),
+                ]
+            )
+        )
+    ]
+
+    # R2 Score
+    row1 = html.Tr(
+        [
+            html.Td("R2 Score"),
+            html.Td(str(r2[0])),
+            html.Td(str(r2[1])),
+            html.Td(str(r2[2])),
+            html.Td(str(r2[3])),
+            html.Td(str(r2[4])),
+        ]
+    )
+
+    table_body = [html.Tbody([row1])]
+
+    table = dbc.Col(
+        dbc.Container(
+            [
+                dbc.Table(table_header + table_body, bordered=True)
+            ]
+        ),
+        style={
+            "margin-top": "15px"
+        }
+    )
+    return table

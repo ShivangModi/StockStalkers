@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 
-from dash import html, dcc
+from dash import html
 
 symbol = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 
@@ -21,17 +21,6 @@ stock_form = dbc.Row(
             dbc.Input(
                 id="ticker",
                 placeholder="TICKER",
-                debounce=True,
-                size="lg",
-            ),
-            width="auto",
-            align="center"
-        ),
-        dbc.Col(
-            dbc.Input(
-                id="forecast-day",
-                placeholder="FORECAST DAY",
-                className="ms-4",
                 size="lg",
             ),
             width="auto",
@@ -42,7 +31,7 @@ stock_form = dbc.Row(
                 "Forecast",
                 id="forecast-btn",
                 color="primary",
-                className="ms-5",
+                className="ms-3",
                 size="lg",
             ),
             width="auto",
