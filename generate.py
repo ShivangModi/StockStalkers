@@ -83,7 +83,7 @@ def generate_stock_graph(fig):
     return stock_graph
 
 
-def generate_score_table(r2):
+def generate_score_table(r2, mse, rmse):
     table_header = [
         html.Thead(
             html.Tr(
@@ -100,18 +100,11 @@ def generate_score_table(r2):
     ]
 
     # R2 Score
-    row1 = html.Tr(
-        [
-            html.Td("R2 Score"),
-            html.Td(str(r2[0])),
-            html.Td(str(r2[1])),
-            html.Td(str(r2[2])),
-            html.Td(str(r2[3])),
-            html.Td(str(r2[4])),
-        ]
-    )
+    row1 = html.Tr([html.Td(str(i)) for i in r2])
+    row2 = html.Tr([html.Td(str(i)) for i in mse])
+    row3 = html.Tr([html.Td(str(i)) for i in rmse])
 
-    table_body = [html.Tbody([row1])]
+    table_body = [html.Tbody([row1, row2, row3])]
 
     table = dbc.Col(
         dbc.Container(

@@ -62,12 +62,15 @@ def update_ticker(submit, ticker):
             stock = Stock(ticker)
             stock_info = stock.get_info()
 
-            stock_detail = generate_stock_detail(stock_info)    # Generate Stock Details
+            # Generate Stock Details
+            stock_detail = generate_stock_detail(stock_info)
 
+            # Generate Prediction Graph
             close_graph = stock.get_graph()
-            stock_graph = generate_stock_graph(close_graph)     # Generate Prediction Graph
+            stock_graph = generate_stock_graph(close_graph)
 
-            table = generate_score_table(stock.r2)              # Generate Table
+            # Generate Table
+            table = generate_score_table(stock.r2, stock.mse, stock.rmse)
 
             # return dbc.Row([stock_detail, stock_graph], align="center")
             return dbc.Container(

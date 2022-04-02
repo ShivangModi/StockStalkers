@@ -264,7 +264,7 @@ def LSTM_model(data):
     model.add(LSTM(50))
     model.add(Dense(1))
     model.compile(loss='mean_squared_error', optimizer='adam')
-    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=2, batch_size=64, verbose=1)
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1, batch_size=64, verbose=1)
 
     lstm_pred = model.predict(X_test)
     lstm_pred = scaler.inverse_transform(lstm_pred)
