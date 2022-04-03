@@ -10,9 +10,6 @@ class Stock:
     def __init__(self, ticker):
         self.ticker = ticker
         self.df = None
-        self.mse = []
-        self.rmse = []
-        self.r2 = []
 
         self.__data = []
         self.__actual = None
@@ -58,8 +55,6 @@ class Stock:
         self.__ma = MovingAverage(self.df)
         ma_pred = dict(x=self.__ma['Date'], y=self.__ma['Predicted_Values'], type='scatter',
                        name='MA Prediction Price')
-        ma_mse = mean_squared_error(self.__ma['Value'], self.__ma['Predicted_Values'])
-        ma_r2 = r2_score(self.__ma['Value'], self.__ma['Predicted_Values'])
 
         # Simple Linear Regression with Gradient Descent Algorithm
         slr = LinearRegression(self.df)
@@ -97,10 +92,6 @@ class Stock:
 
         self.__data = [actual, slr_pred, knn_pred, ma_pred, arima_pred, lstm_pred, future_pred]
 
-        self.r2 = ["R2 Score", slr_r2, knn_r2, ma_r2, arima_r2, lstm_r2]
-        self.mse = ["MSE", slr_mse, knn_mse, ma_mse, arima_mse, lstm_mse]
-        self.rmse = ["RMSE", sqrt(slr_mse), sqrt(knn_mse), sqrt(ma_mse), sqrt(arima_mse), sqrt(lstm_mse)]
-
     def get_graph(self):
         if self.__get_data():
             self.__prediction()
@@ -119,3 +110,29 @@ class Stock:
             return fig
         else:
             raise ConnectionError
+
+    def get_score(self):
+        # Simple Moving Average
+        ma_mse = mean_squared_error(self.__ma['Value'], self.__ma['Predicted_Values'])
+        ma_r2 = r2_score(self.__ma['Value'], self.__ma['Predicted_Values'])
+
+        # Simple Linear Regression with Gradient Descent Algorithm
+        slr_mse = mean_squared_error(self.__slr['Value'], self.__slr['Predicted_Values'])
+        slr_r2 = r2_score(self.__slr['Value'], self.__slr['Predicted_Values'])
+
+        # K-Nearest Neighbor algorithm with library
+        knn_mse = mean_squared_error(self.__knn['Value'], self.__knn['Predicted_Values'])
+        knn_r2 = r2_score(self.__knn['Value'], self.__knn['Predicted_Values'])
+
+        # Auto Regressive Integrated Moving Average (ARIMA)
+        arima_mse = mean_squared_error(self.__arima['Value'], self.__arima['Predicted_Values'])
+        arima_r2 = r2_score(self.__arima['Value'], self.__arima['Predicted_Values'])
+
+        # Long Short-Term Memory (LSTM) with library
+        lstm_mse = mean_squared_error(self.__lstm['Value'], self.__lstm['Predicted_Values'])
+        lstm_r2 = r2_score(self.__lstm['Value'], self.__lstm['Predicted_Values'])
+
+        r2 = ["R2 Score", slr_r2, knn_r2, ma_r2, arima_r2, lstm_r2]
+        mse = ["MSE", slr_mse, knn_mse, ma_mse, arima_mse, lstm_mse]
+        rmse = ["RMSE", sqrt(slr_mse), sqrt(knn_mse), sqrt(ma_mse), sqrt(arima_mse), sqrt(lstm_mse)]
+        return r2, mse, rmse

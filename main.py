@@ -60,9 +60,9 @@ def update_ticker(submit, ticker):
     if submit and trigger == "forecast-btn":
         if ticker:
             stock = Stock(ticker)
-            stock_info = stock.get_info()
 
             # Generate Stock Details
+            stock_info = stock.get_info()
             stock_detail = generate_stock_detail(stock_info)
 
             # Generate Prediction Graph
@@ -70,7 +70,8 @@ def update_ticker(submit, ticker):
             stock_graph = generate_stock_graph(close_graph)
 
             # Generate Table
-            table = generate_score_table(stock.r2, stock.mse, stock.rmse)
+            r2, mse, rmse = stock.get_score()
+            table = generate_score_table(r2, mse, rmse)
 
             # return dbc.Row([stock_detail, stock_graph], align="center")
             return dbc.Container(
