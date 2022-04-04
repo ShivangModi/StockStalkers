@@ -86,9 +86,9 @@ class Stock:
         lstm_mse = mean_squared_error(self.__lstm['Value'], self.__lstm['Predicted_Values'])
         lstm_r2 = r2_score(self.__lstm['Value'], self.__lstm['Predicted_Values'])
 
-        # 3 month Future Prediction
+        # 180 days Future Prediction
         future_pred = dict(x=self.__future['Date'], y=self.__future['Value'], type='scatter',
-                           name='3 month Future Prediction Price')
+                           name='180 days Future Prediction Price')
 
         self.__data = [actual, slr_pred, knn_pred, ma_pred, arima_pred, lstm_pred, future_pred]
 
